@@ -1,0 +1,103 @@
+apply plugin: 'com.android.application'
+apply plugin: 'findbugs'
+
+
+android {
+    compileSdkVersion 27
+    buildToolsVersion '28.0.3'
+
+    defaultConfig {
+        applicationId "com.android.insecurebankv2"
+        minSdkVersion 15
+        targetSdkVersion 27
+        versionCode 2
+        versionName "2.0"
+        useLibrary 'org.apache.http.legacy'
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+dependencies {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    // compile 'com.android.support:appcompat-v7:22.2.0'
+    implementation 'com.google.android.gms:play-services:7.5.0'
+    implementation 'com.github.marcohc:Toasteroid:2.1.4'
+
+    //Dependencies for FindBugs and FindBugs plugins
+    findbugs 'com.google.code.findbugs:findbugs:3.0.1'
+    findbugs configurations.findbugsPlugins.dependencies
+    findbugsPlugins 'com.h3xstream.findsecbugs:findsecbugs-plugin:1.4.4'
+}
+
+//FindBugs task that load security rules only
+task findSecurityBugs(type: FindBugs) {
+
+    //classes = fileTree(project.rootDir.absolutePath).include("**/*.class");
+    //source = fileTree(project.rootDir.absolutePath).include("**/*.java");
+
+    classes = fileTree("$project.buildDir/app/build/intermediates/classes/")
+    source = fileTree('/src/main/java/com/android/insecurebankv2')
+    
+    classpath = files()
+    pluginClasspath = project.configurations.findbugsPlugins
+
+    findbugs {
+        toolVersion = "3.0.1"
+        //sourceSets = [android.sourceSets]
+        ignoreFailures = true
+        reportsDir = file("$project.buildDir/findbugsReports")
+        effort = "max"
+        reportLevel = "low"
+        includeFilter = file("$project.rootDir/fsb-include.xml")
+        excludeFilter = file("$project.rootDir/fsb-exclude.xml")
+
+//        reports {
+//            xml.enabled = false
+//            html.enabled = true
+//            html.destination = file("$project.buildDir/outputs/findbugs/findbugs.html")
+//        }
+    }
+
+
+
+    buildscript {
+
+        repositories {
+            google() // here
+            jcenter()
+        }
+
+        dependencies {
+            classpath 'com.android.tools.build:gradle:3.2.0-alpha12'
+
+        }
+
+        android {
+            lintOptions {
+                abortOnError false
+            }
+        }
+
+
+    }
+
+    allprojects {
+        repositories {
+            google() // and here
+            jcenter()
+        }
+
+    }
+
+
+    repositories {
+        maven {
+            url "https://jitpack.io"
+        }
+    }
+}
