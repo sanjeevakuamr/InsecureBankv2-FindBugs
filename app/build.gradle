@@ -42,7 +42,7 @@ task findSecurityBugs(type: FindBugs) {
 
     classes = fileTree("$project.buildDir/app/build/intermediates/classes/")
     source = fileTree('/src/main/java/com/android/insecurebankv2')
-    
+
     classpath = files()
     pluginClasspath = project.configurations.findbugsPlugins
 
